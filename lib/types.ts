@@ -137,7 +137,6 @@ export function getCategoryExpenses(transactions: Transaction[]): CategoryExpens
   }));
 }
 
-// optional: use fixed colors or hash to color mapping
 export function getCategoryColor(category: string): string {
   const colors = [
     '#EF4444', '#F59E0B', '#10B981',
@@ -147,3 +146,114 @@ export function getCategoryColor(category: string): string {
   const hash = category.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return colors[hash % colors.length];
 }
+
+export const getBudgetComparisons = (budget: Budget[], transactions: Transaction[]) => {
+  const res =  budget.map((b: Budget) => {
+      const totalSpent = transactions
+        .filter((t) => t.category === b.category && t.type === 'expense' && t.month === b.month)
+        .reduce((acc, curr) => acc + curr.amount, 0)
+
+      const percentage = parseFloat(((totalSpent / b.amount) * 100).toFixed(2))
+
+      return {
+        _id: b._id,
+        category: b.category,
+        budgeted: b.amount,
+        actual: totalSpent,
+        remaining: b.amount - totalSpent,
+        percentage: percentage,
+        month: b.month,
+        color: percentage > 100 ? 'red' : percentage > 80 ? 'orange' : 'green'
+      }
+    })
+
+    return res;
+}
+
+export const getCategoryExpensesForMonth = (transactions: Transaction[]): CategoryExpense[] => {
+  const categoryData: { [key: string]: number } = {};
+  
+  transactions
+    .filter(t => t.type === 'expense')
+    .forEach(transaction => {
+      const category = transaction.category || 'Other';
+      if (!categoryData[category]) {
+        categoryData[category] = 0;
+      }
+      categoryData[category] += Math.abs(transaction.amount);
+    });
+  
+  return Object.entries(categoryData)
+    .map(([category, amount]) => ({
+      category,
+      amount,
+      color: getCategoryColor(category)
+    }))
+    .sort((a, b) => b.amount - a.amount);
+};
+
+export const getSpendingInsights = (transactions: Transaction[], budget: Budget[]): SpendingInsight[] => {
+  const insights: SpendingInsight[] = [];
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const lastMonth = new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().slice(0, 7);
+  
+  const currentMonthExpenses = transactions.filter(t => 
+    t.type === 'expense' && t.month.startsWith(currentMonth)
+  );
+  const lastMonthExpenses = transactions.filter(t => 
+    t.type === 'expense' && t.month.startsWith(lastMonth)
+  );
+  
+  const currentTotal = currentMonthExpenses.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const lastTotal = lastMonthExpenses.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  
+  if (lastTotal > 0) {
+    const change = ((currentTotal - lastTotal) / lastTotal) * 100;
+    if (change > 20) {
+      insights.push({
+        type: 'warning',
+        title: 'Spending Increased',
+        description: `Your spending is up ${change.toFixed(1)}% from last month`,
+        icon: 'TrendingUp'
+      });
+    } else if (change < -10) {
+      insights.push({
+        type: 'success',
+        title: 'Great Savings!',
+        description: `You've reduced spending by ${Math.abs(change).toFixed(1)}% this month`,
+        icon: 'TrendingDown'
+      });
+    }
+  }
+  
+  const budgetComparisons = getBudgetComparisons(budget, transactions);
+  const overBudgetCategories = budgetComparisons.filter(b => b.percentage > 100);
+  
+  if (overBudgetCategories.length > 0) {
+    const worstCategory = overBudgetCategories[0];
+    insights.push({
+      type: 'warning',
+      title: 'Budget Exceeded',
+      description: `${worstCategory.category} is ${(worstCategory.percentage - 100).toFixed(1)}% over budget`,
+      icon: 'AlertTriangle'
+    });
+  }
+  
+  const categoryExpenses = getCategoryExpensesForMonth(currentMonthExpenses);
+  if (categoryExpenses.length > 0) {
+    const topCategory = categoryExpenses[0];
+    const totalExpenses = categoryExpenses.reduce((sum, c) => sum + c.amount, 0);
+    const percentage = (topCategory.amount / totalExpenses) * 100;
+    
+    if (percentage > 40) {
+      insights.push({
+        type: 'info',
+        title: 'Top Spending Category',
+        description: `${topCategory.category} accounts for ${percentage.toFixed(1)}% of your expenses`,
+        icon: 'PieChart'
+      });
+    }
+  }
+  
+  return insights;
+};

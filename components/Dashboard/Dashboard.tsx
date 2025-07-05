@@ -5,34 +5,20 @@ import Hero from "./Hero"
 import Navbar from "./Navbar"
 import SummaryTabs from "./SummaryTabs"
 import { useAppContext } from "@/lib/context/AppContext"
-import { Budget, BudgetComparison } from "@/lib/types"
+import { Budget, BudgetComparison, getBudgetComparisons, getSpendingInsights, SpendingInsight } from "@/lib/types"
 import Footer from "./Footer"
 
 const Dashboard = () => {
-  const { transactions, loading, budget, budgetLoading } = useAppContext()
+  const { transactions, loading, budget } = useAppContext()
   const [budgetComparisonData, setBudgetComparisonData] = useState<BudgetComparison[]>([])
+  const [insights, setInsights] = useState<SpendingInsight[]>([])
 
   useEffect(() => {
-    const budgetComparisonData: BudgetComparison[] = budget.map((b: Budget) => {
-      const totalSpent = transactions
-        .filter((t) => t.category === b.category && t.type === 'expense' && t.month === b.month)
-        .reduce((acc, curr) => acc + curr.amount, 0)
-
-      const percentage = parseFloat(((totalSpent / b.amount) * 100).toFixed(2))
-
-      return {
-        _id: b._id,
-        category: b.category,
-        budgeted: b.amount,
-        actual: totalSpent,
-        remaining: b.amount - totalSpent,
-        percentage: percentage,
-        month: b.month,
-        color: percentage > 100 ? 'red' : percentage > 80 ? 'orange' : 'green'
-      }
-    })
-
+    const budgetComparisonData: BudgetComparison[] = getBudgetComparisons(budget, transactions)
     setBudgetComparisonData(budgetComparisonData)
+
+    const currentInsights = getSpendingInsights(transactions, budget)
+    setInsights(currentInsights)
    }, [budget, transactions])
 
   return (
@@ -40,7 +26,7 @@ const Dashboard = () => {
         <Navbar />
         <Hero />
         <FinanceBoard transactions={transactions} loader={loading} />
-        <SummaryTabs transactions={transactions} budgetComparisonData={budgetComparisonData}/>
+        <SummaryTabs transactions={transactions} budgetComparisonData={budgetComparisonData} insights={insights} />
         <Footer />
     </div>
   )
