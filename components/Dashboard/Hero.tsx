@@ -26,9 +26,9 @@ const Hero = () => {
 
 
     return (
-        <div className=" flex min-h-screen px-4">
-            <div className=" flex flex-col w-1/2 items-center justify-center text-center">
-                <h1 className="text-7xl font-bold leading-0.2">
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-4 min-h-screen px-4">
+            <div className=" flex flex-col lg:w-1/2 items-center justify-center text-center">
+                <h1 className="text-3xl lg:text-7xl font-bold leading-0.2">
                     <span className=" font-mono shadow-sm">Personal</span>
                     <br />
                     Finance
@@ -36,7 +36,7 @@ const Hero = () => {
                     {dashboardText.slice(0, visibleLetters)}
                 </h1>
             </div>
-            <div className=" flex items-center justify-center -z-10 text-white w-1/2">
+            <div className=" flex items-center justify-center -z-10 max-w-full text-white lg:w-1/2">
               <ExampleChart />
             </div>
         </div>

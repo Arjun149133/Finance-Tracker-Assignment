@@ -18,11 +18,11 @@ const Overview = () => {
 
     }, [transactions])
   return (
-    <div className=" flex gap-2">
-        <div className=" w-1/2">
+    <div className=" flex flex-col lg:flex-row gap-2">
+        <div className=" lg:w-1/2">
             <MonthlyBarChart data={MonthlyData} />
         </div>
-        <div className=" w-1/2">
+        <div className=" lg:w-1/2">
             <CategoryPieChart data={CategoryData} />
         </div>
     </div>

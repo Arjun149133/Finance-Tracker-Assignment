@@ -106,7 +106,7 @@ export default function TransactionList({ transactions }: TransactionListProps) 
   };
 
   return (
-    <Card className="w-full text-white">
+    <Card className="w-full text-sm lg:text-md text-white">
       <CardHeader>
         <CardTitle className="font-bold text-xl">Transaction History</CardTitle>
         <div className="flex flex-col gap-4 mt-4">

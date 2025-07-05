@@ -4,7 +4,7 @@ const Logo = () => {
   return (
     <div className=" flex items-center justify-center">
         <Image src={"/wallet.svg"} width={35} height={35} alt="image" className="" />
-        <span className=" text-lg font-mono ml-2">Finance Tracker</span> 
+        <span className=" text-xs lg:text-lg font-mono ml-2">Finance Tracker</span> 
     </div>
   )
 }

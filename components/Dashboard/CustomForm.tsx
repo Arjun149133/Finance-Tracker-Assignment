@@ -8,7 +8,7 @@ const CustomForm = () => {
    const [isDialogOpen1, setIsDialogOpen1] = useState(false);
     const [isDialogOpen2, setIsDialogOpen2] = useState(false);
   return (
-    <div className=" flex items-center justify-center gap-4">
+    <div className=" flex items-center justify-center lg:gap-4 gap-1">
       <Dialog open={isDialogOpen2} onOpenChange={setIsDialogOpen2}>
           <DialogTrigger asChild>
             <Button className=" from-slate-800 to-slate-900 border border-white hover:brightness-125 text-sm duration-100 ease-in-out bg-gradient-to-b text-white font-semibold rounded-md shadow-md">
