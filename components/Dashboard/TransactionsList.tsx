@@ -1,67 +1,71 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Transaction,
   EXPENSE_CATEGORIES,
   INCOME_CATEGORIES,
-} from '@/lib/types';
-import {
-  Edit,
-  Trash2,
-  Search,
-  TrendingUp,
-  TrendingDown,
-} from 'lucide-react';
+} from "@/lib/types";
+import { Edit, Trash2, Search, TrendingUp, TrendingDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../ui/dialog';
-import TransactionForm from './TransactionForm';
-import axios from 'axios';
-import { useAppContext } from '@/lib/context/AppContext';
-import { toast } from 'sonner';
+} from "../ui/dialog";
+import TransactionForm from "./TransactionForm";
+import axios from "axios";
+import { useAppContext } from "@/lib/context/AppContext";
+import { toast } from "sonner";
 
 interface TransactionListProps {
   transactions: Transaction[];
 }
 
-export default function TransactionList({ transactions }: TransactionListProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
-  const [filterType, setFilterType] = useState<string>('all');
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const {fetchTransactions} = useAppContext()
+export default function TransactionList({
+  transactions,
+}: TransactionListProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<"date" | "amount">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [filterType, setFilterType] = useState<string>("all");
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
+  const { fetchTransactions } = useAppContext();
 
   const allCategories = [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES];
 
   const filteredTransactions = transactions
     .filter((transaction) => {
-      const matchesSearch = transaction.title.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = filterCategory === 'all' || transaction.category === filterCategory;
-      const matchesType = filterType === 'all' || transaction.type === filterType;
+      const matchesSearch = transaction.title
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesCategory =
+        filterCategory === "all" || transaction.category === filterCategory;
+      const matchesType =
+        filterType === "all" || transaction.type === filterType;
       return matchesSearch && matchesCategory && matchesType;
     })
     .sort((a, b) => {
-      const multiplier = sortOrder === 'asc' ? 1 : -1;
-      if (sortBy === 'date') {
-        return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * multiplier;
+      const multiplier = sortOrder === "asc" ? 1 : -1;
+      if (sortBy === "date") {
+        return (
+          (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) *
+          multiplier
+        );
       } else {
         return (a.amount - b.amount) * multiplier;
       }
@@ -70,39 +74,38 @@ export default function TransactionList({ transactions }: TransactionListProps) 
   const handleDelete = async (id: string) => {
     try {
       const res = await axios.delete(`/api/transactions`, {
-      data: { id },
-    });
+        data: { id },
+      });
 
-    if (res.data.success) {
-      setSelectedTransaction(null);
-      toast.success('Transaction deleted successfully!');
-      fetchTransactions();
-    } else {
-      toast.error('Failed to delete transaction.');
-      console.error('Failed to delete transaction');
-    }
+      if (res.data.success) {
+        setSelectedTransaction(null);
+        toast.success("Transaction deleted successfully!");
+        fetchTransactions();
+      } else {
+        toast.error("Failed to delete transaction.");
+        console.error("Failed to delete transaction");
+      }
     } catch (error) {
-      console.error('Error deleting transaction:', error);
-      
+      console.error("Error deleting transaction:", error);
     }
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
-  const formatAmount = (amount: number, type: 'income' | 'expense') => {
-    const formatted = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+  const formatAmount = (amount: number, type: "income" | "expense") => {
+    const formatted = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(Math.abs(amount));
 
-    return type === 'income' ? `+${formatted}` : `-${formatted}`;
+    return type === "income" ? `+${formatted}` : `-${formatted}`;
   };
 
   return (
@@ -149,17 +152,17 @@ export default function TransactionList({ transactions }: TransactionListProps) 
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setSortBy(sortBy === 'date' ? 'amount' : 'date')}
+              onClick={() => setSortBy(sortBy === "date" ? "amount" : "date")}
             >
-              Sort by {sortBy === 'date' ? 'Amount' : 'Date'}
+              Sort by {sortBy === "date" ? "Amount" : "Date"}
             </Button>
 
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
             >
-              {sortOrder === 'asc' ? '↑' : '↓'}
+              {sortOrder === "asc" ? "↑" : "↓"}
             </Button>
           </div>
         </div>
@@ -168,26 +171,26 @@ export default function TransactionList({ transactions }: TransactionListProps) 
       <CardContent>
         {filteredTransactions.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            {searchTerm || filterCategory !== 'all' || filterType !== 'all'
-              ? 'No transactions found matching your filters.'
-              : 'No transactions yet. Add your first transaction above!'}
+            {searchTerm || filterCategory !== "all" || filterType !== "all"
+              ? "No transactions found matching your filters."
+              : "No transactions yet. Add your first transaction above!"}
           </div>
         ) : (
           <div className="space-y-3">
             {filteredTransactions.map((transaction) => (
               <div
                 key={transaction.createdAt}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-900 transition-colors"
+                className="flex items-center justify-between lg:p-4 p-1 border rounded-lg hover:bg-gray-900 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={`p-2 rounded-full ${
-                      transaction.type === 'income'
-                        ? 'bg-green-100 text-green-600'
-                        : 'bg-red-100 text-red-600'
+                      transaction.type === "income"
+                        ? "bg-green-100 text-green-600"
+                        : "bg-red-100 text-red-600"
                     }`}
                   >
-                    {transaction.type === 'income' ? (
+                    {transaction.type === "income" ? (
                       <TrendingUp className="h-4 w-4" />
                     ) : (
                       <TrendingDown className="h-4 w-4" />
@@ -196,7 +199,9 @@ export default function TransactionList({ transactions }: TransactionListProps) 
                   <div>
                     <h4 className="font-medium">{transaction.title}</h4>
                     <div className="flex items-center gap-2 mt-1">
-                      <p className="text-sm text-gray-500">{transaction.month}</p>
+                      <p className="text-sm text-gray-500">
+                        {transaction.month}
+                      </p>
                       <Badge variant="outline" className="text-xs">
                         {transaction.category}
                       </Badge>
@@ -208,22 +213,22 @@ export default function TransactionList({ transactions }: TransactionListProps) 
                   <div className="text-right">
                     <p
                       className={`font-semibold ${
-                        transaction.type === 'income'
-                          ? 'text-green-600'
-                          : 'text-red-600'
+                        transaction.type === "income"
+                          ? "text-green-600"
+                          : "text-red-600"
                       }`}
                     >
                       {formatAmount(transaction.amount, transaction.type)}
                     </p>
                     <Badge
                       variant={
-                        transaction.type === 'income' ? 'default' : 'secondary'
+                        transaction.type === "income" ? "default" : "secondary"
                       }
                     >
                       {transaction.type}
                     </Badge>
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex flex-col lg:flex-row gap-1">
                     <Dialog
                       open={selectedTransaction?._id === transaction._id}
                       onOpenChange={(open) => {
