@@ -1,10 +1,17 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
-import Budgets from "./Budgets"
 import Insights from "./Insights"
 import Overview from "./Overview"
+import { BudgetComparison, Transaction } from "@/lib/types"
 import TransactionsList from "./TransactionsList"
+import BudgetList from "./BudgetList"
 
-const SummaryTabs = () => {
+const SummaryTabs = ({
+    transactions,
+    budgetComparisonData
+}: {
+    transactions: Transaction[]
+    budgetComparisonData: BudgetComparison[]
+}) => {
   return (
     <div className="p-4">
         <Tabs defaultValue="overview" className="">
@@ -18,10 +25,10 @@ const SummaryTabs = () => {
                 <Overview />
             </TabsContent>
             <TabsContent value="transactions">
-                <TransactionsList />
+                <TransactionsList transactions={transactions}/>
             </TabsContent>
             <TabsContent value="budgets">
-                <Budgets />
+                <BudgetList data={budgetComparisonData}/>
             </TabsContent>
             <TabsContent value="insights">
                 <Insights />

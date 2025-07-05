@@ -3,16 +3,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Transaction } from '@/lib/types';
 import { TrendingUp, TrendingDown, DollarSign, Calculator, Target, PieChart } from 'lucide-react';
+import SpinnerLoader from '../SpinnerLoader';
 
 interface SummaryStatsProps {
   transactions: Transaction[];
+  loader?: boolean;
 }
 
-const FinanceBoard = ({ transactions }: SummaryStatsProps) => {
+const FinanceBoard = ({ transactions, loader }: SummaryStatsProps) => {
   const currentMonth = new Date().toISOString().slice(0, 7);
   
   const currentMonthTransactions = transactions.filter(t => 
-    t.date.startsWith(currentMonth)
+    t.createdAt.startsWith(currentMonth)
   );
   
   const totalIncome = currentMonthTransactions
@@ -95,6 +97,14 @@ const FinanceBoard = ({ transactions }: SummaryStatsProps) => {
       borderColor: 'border-orange-500/20',
     },
   ];
+
+  if(loader) {
+    return (
+      <div className=' flex items-center justify-center h-full'>
+        <SpinnerLoader />
+      </div>
+    )
+  }
 
   return (
     <div className=' flex flex-col px-4 pb-4'>

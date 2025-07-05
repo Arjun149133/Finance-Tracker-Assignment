@@ -1,9 +1,11 @@
 export interface Transaction {
   id: string;
+  _id: string;
   amount: number;
-  date: string;
+  title: string;
   description: string;
   type: 'income' | 'expense';
+  month: string;
   category: string;
   createdAt: string;
   updatedAt: string;
@@ -21,6 +23,7 @@ export interface CategoryExpense {
 }
 
 export interface Budget {
+  _id: string;
   id: string;
   category: string;
   amount: number;
@@ -30,11 +33,13 @@ export interface Budget {
 }
 
 export interface BudgetComparison {
+  _id: string;
   category: string;
   budgeted: number;
   actual: number;
   remaining: number;
   percentage: number;
+  month?: string;
   color: string;
 }
 
@@ -91,18 +96,54 @@ export const CATEGORY_COLORS = {
   'Gifts': '#16A34A',
 } as const;
 
-// Helper function to get category color with fallback
-export const getCategoryColor = (category: string): string => {
-  return CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || '#6B7280';
-};
-
-// Helper function to validate category
 export const isValidCategory = (category: string, type: 'income' | 'expense'): boolean => {
   const validCategories = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   return validCategories.includes(category as any);
 };
 
-// Helper function to get default category
 export const getDefaultCategory = (type: 'income' | 'expense'): string => {
   return type === 'income' ? 'Other' : 'Other';
 };
+
+export function getMonthlyExpenses(transactions: Transaction[]): MonthlyExpense[] {
+  const monthlyMap: Record<string, number> = {};
+
+  transactions.forEach((tx) => {
+    if (tx.type === 'expense') {
+      monthlyMap[tx.month] = (monthlyMap[tx.month] || 0) + tx.amount;
+    }
+  });
+
+  return Object.entries(monthlyMap).map(([month, amount]) => ({
+    month,
+    amount,
+  }));
+}
+
+
+export function getCategoryExpenses(transactions: Transaction[]): CategoryExpense[] {
+  const categoryMap: Record<string, number> = {};
+
+  transactions.forEach((tx) => {
+    if (tx.type === 'expense') {
+      categoryMap[tx.category] = (categoryMap[tx.category] || 0) + tx.amount;
+    }
+  });
+
+  return Object.entries(categoryMap).map(([category, amount]) => ({
+    category,
+    amount,
+    color: getCategoryColor(category),
+  }));
+}
+
+// optional: use fixed colors or hash to color mapping
+export function getCategoryColor(category: string): string {
+  const colors = [
+    '#EF4444', '#F59E0B', '#10B981',
+    '#3B82F6', '#8B5CF6', '#EC4899',
+    '#6366F1', '#14B8A6', '#F43F5E',
+  ];
+  const hash = category.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[hash % colors.length];
+}

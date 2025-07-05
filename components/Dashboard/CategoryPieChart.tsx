@@ -4,12 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { CategoryExpense } from '@/lib/types';
 import { PieChart as PieChartIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface CategoryChartProps {
   data: CategoryExpense[];
 }
 
 export default function CategoryPieChart({ data }: CategoryChartProps) {
+  const [dataWithTotal, setDataWithTotal] = useState<CategoryExpense[]>(data);
+  const [totalAmount, setTotalAmount] = useState<number>(0);
   const formatAmount = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -48,15 +51,30 @@ export default function CategoryPieChart({ data }: CategoryChartProps) {
               className="w-3 h-3 rounded-full" 
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-muted-foreground">{entry.value}</span>
+            <span className="text-muted-foreground">{entry.payload.category}</span>
           </div>
         ))}
       </div>
     );
   };
 
-  const totalAmount = data.reduce((sum, item) => sum + item.amount, 0);
-  const dataWithTotal = data.map(item => ({ ...item, total: totalAmount }));
+  useEffect(() => {
+    if (data.length === 0) {
+      setDataWithTotal([]);
+      setTotalAmount(0);
+      return;
+    }
+
+    const total = data.reduce((sum, item) => sum + item.amount, 0);
+    const updatedData = data.map(item => ({
+      ...item,
+      total,
+      color: `hsl(${Math.random() * 360}, 70%, 50%)` // Generate random color if not provided
+    }));
+
+    setDataWithTotal(updatedData);
+    setTotalAmount(total);
+  }, [data]);
 
   return (
     <Card className="w-full bg-card/50 backdrop-blur-sm border-border/50">

@@ -12,7 +12,13 @@ export enum CategoryEnum {
     PersonalCare = "Personal Care",
     HomeAndGarden = "Home & Garden",
     GiftsAndDonations = "Gifts & Donations",
-    Other = "Other"
+    Other = "Other",
+    Salary = "Salary",
+    Freelance = "Freelance",
+    Business = "Business",
+    Investments = "Investments",
+    RentalIncome = "Rental Income",
+    Gifts = "Gifts"
 }
 
 export enum MonthEnum {

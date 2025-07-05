@@ -1,19 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import connectToDatabase from '@/lib/mongo'
-import Transaction from '@/lib/models/Transaction'
+import Budget from '@/lib/models/Budget'
 
 export async function POST(req: NextRequest) {
   try {
     await connectToDatabase() 
     const data = await req.json()
 
-    const res = await Transaction.create({
-      title: data.title,
-      amount: data.amount,
-      month: data.month,
-      description: data.description || '',
-      type: data.type,
-      category: data.category,
+    const res = await Budget.create({
+        category: data.category,
+        amount: data.amount,
+        month: data.month,
+        description: data.description || '',
     })
 
     return NextResponse.json({ success: true, data: {id: res._id} }, { status: 201 })
@@ -26,9 +24,9 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase()
-    const transactions = await Transaction.find({}).sort({ createdAt: -1 })
+    const budgets = await Budget.find({}).sort({ createdAt: -1 })
 
-    return NextResponse.json({ success: true, data: transactions }, { status: 200 })
+    return NextResponse.json({ success: true, data: budgets }, { status: 200 })
   } catch (error) {
     console.error('Error fetching transactions:', error)
     return NextResponse.json({ success: false }, { status: 500 })
@@ -40,10 +38,10 @@ export async function DELETE(req: NextRequest) {
     await connectToDatabase()
     const { id } = await req.json()
 
-    const res = await Transaction.findByIdAndDelete(id)
+    const res = await Budget.findByIdAndDelete(id)
 
     if (!res) {
-      return NextResponse.json({ success: false, message: 'Transaction not found' }, { status: 404 })
+      return NextResponse.json({ success: false, message: 'Budget not found' }, { status: 404 })
     }
 
     return NextResponse.json({ success: true }, { status: 200 })
@@ -58,18 +56,15 @@ export async function PUT(req: NextRequest) {
     await connectToDatabase()
     const data = await req.json()
 
-    const res = await Transaction.findByIdAndUpdate(data.id, {
-      title: data.title,
+    const res = await Budget.findByIdAndUpdate(data.id, {
+      category: data.category,
       amount: data.amount,
       month: data.month,
       description: data.description || '',
-      type: data.type,
-      category: data.category,
-    }, { new: true }) 
-    
+    }, { new: true })   
     if (!res) {
-      return NextResponse.json({ success: false, message: 'Transaction not found' }, { status: 404 })
-    } 
+      return NextResponse.json({ success: false, message: 'Budget not found' }, { status: 404 })
+    }
     return NextResponse.json({ success: true, data: res }, { status: 200 })
   } catch (error) {
     console.error('Error updating transaction:', error)

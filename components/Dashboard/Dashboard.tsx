@@ -1,49 +1,47 @@
-import { Transaction } from "@/lib/types"
+"use client"
+import { useEffect, useState } from "react"
 import FinanceBoard from "./FinanceBoard"
 import Hero from "./Hero"
 import Navbar from "./Navbar"
 import SummaryTabs from "./SummaryTabs"
-
-const Transactions: Transaction[] = [
-  {
-    id: "1",
-    amount: 5000,
-    date: "2023-10-01",
-    description: "Salary",
-    type: "income",
-    category: "Salary",
-    createdAt: "2023-10-01T00:00:00Z",
-    updatedAt: "2023-10-01T00:00:00Z"
-  },
-  {
-    id: "2",
-    amount: -200,
-    date: "2023-10-02",
-    description: "Groceries",
-    type: "expense",
-    category: "Food & Dining",
-    createdAt: "2023-10-02T00:00:00Z",
-    updatedAt: "2023-10-02T00:00:00Z"
-  },
-  {
-    id: "3",
-    amount: -150,
-    date: "2023-10-03",
-    description: "Electricity Bill",
-    type: "expense",
-    category: "Bills & Utilities",
-    createdAt: "2023-10-03T00:00:00Z",
-    updatedAt: "2023-10-03T00:00:00Z"
-  }
-]
+import { useAppContext } from "@/lib/context/AppContext"
+import { Budget, BudgetComparison } from "@/lib/types"
+import Footer from "./Footer"
 
 const Dashboard = () => {
+  const { transactions, loading, budget, budgetLoading } = useAppContext()
+  const [budgetComparisonData, setBudgetComparisonData] = useState<BudgetComparison[]>([])
+
+  useEffect(() => {
+    const budgetComparisonData: BudgetComparison[] = budget.map((b: Budget) => {
+      const totalSpent = transactions
+        .filter((t) => t.category === b.category && t.type === 'expense' && t.month === b.month)
+        .reduce((acc, curr) => acc + curr.amount, 0)
+
+      const percentage = parseFloat(((totalSpent / b.amount) * 100).toFixed(2))
+
+      return {
+        _id: b._id,
+        category: b.category,
+        budgeted: b.amount,
+        actual: totalSpent,
+        remaining: b.amount - totalSpent,
+        percentage: percentage,
+        month: b.month,
+        color: percentage > 100 ? 'red' : percentage > 80 ? 'orange' : 'green'
+      }
+    })
+
+    setBudgetComparisonData(budgetComparisonData)
+   }, [budget, transactions])
+
   return (
     <div className="">
         <Navbar />
         <Hero />
-        <FinanceBoard transactions={Transactions} />
-        <SummaryTabs />
+        <FinanceBoard transactions={transactions} loader={loading} />
+        <SummaryTabs transactions={transactions} budgetComparisonData={budgetComparisonData}/>
+        <Footer />
     </div>
   )
 }
